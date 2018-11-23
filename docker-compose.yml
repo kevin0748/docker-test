@@ -1,17 +1,35 @@
 version: '3'
 services:
-  app:
-    build:
-      context: .
-      dockerfile: .docker/Dockerfile
-    image: laravel-docker
-    ports:
-     - "8080:80"
+  php:
+    build: '.docker/php/'
+    networks:
+      - backend
     volumes:
      - .:/code/app
-    links:
-     - redis
+    container_name: php
+
+  apache:
+    build: '.docker/apache/'
+    ports:
+     - "8080:80"
+    depends_on:
+      - php
+      - redis
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - .:/code/app
+    container_name: apache
+
   redis:
     image: "redis:alpine"
+    networks:
+      - backend
     ports: 
      - "6379:6379"
+    container_name: redis
+
+networks:
+  frontend:
+  backend:
